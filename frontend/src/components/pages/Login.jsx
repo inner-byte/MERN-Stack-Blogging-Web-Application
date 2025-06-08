@@ -1,22 +1,20 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
+import { useForm } from 'react-hook-form';
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Context } from "../../main";
 import axios from "axios";
 import toast from "react-hot-toast";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const { mode, isAuthenticated } = useContext(Context);
   const navigateTo = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async (data) => {
     await axios
       .post(
         "http://localhost:4000/api/v1/user/login",
-        { email, password, role },
+        { email: data.email, password: data.password, role: data.role },
         {
           withCredentials: true,
           headers: { "Content-Type": "application/json" },
@@ -24,9 +22,7 @@ const Login = () => {
       )
       .then((res) => {
         toast.success(res.data.message);
-        setEmail("");
-        setPassword("");
-        setRole("");
+        reset(); // Reset form fields
         navigateTo("/");
       })
       .catch((error) => {
@@ -41,30 +37,34 @@ const Login = () => {
   return (
     <article className={mode === "dark" ? "dark-bg" : "light-bg"}>
       <section className="auth-form">
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit(handleLogin)}>
           <h1>LOGIN</h1>
           <div>
-            <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <select {...register("role", { required: "Please select a role." })}>
               <option value="">SELECT ROLE</option>
               <option value="Reader">READER</option>
               <option value="Author">AUTHOR</option>
             </select>
+            {errors.role && <p className="error-message">{errors.role?.message}</p>}
           </div>
           <div>
             <input
               type="email"
               placeholder="Your Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email", {
+                required: "Email is required.",
+                pattern: { value: /^\S+@\S+\.\S+$/, message: "Please enter a valid email address." }
+              })}
             />
+            {errors.email && <p className="error-message">{errors.email?.message}</p>}
           </div>
           <div>
             <input
               type="password"
               placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password", { required: "Password is required." })}
             />
+            {errors.password && <p className="error-message">{errors.password?.message}</p>}
           </div>
           <p>
             Don't have any Account? <Link to={"/register"}>Register Now</Link>

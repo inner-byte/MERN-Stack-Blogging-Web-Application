@@ -10,6 +10,14 @@
 ::-webkit-scrollbar {
   display: none;
 }
+
+.error-message {
+  color: #F56565; /* A modern red, from our defined accent colors */
+  font-size: 0.875rem; /* Roughly 14px if base is 16px */
+  margin-top: 4px;
+  display: block; /* Ensure it takes its own line if needed */
+}
+
 .dark-bg {
   background: #1A202C;
   color: #E2E8F0 !important;
